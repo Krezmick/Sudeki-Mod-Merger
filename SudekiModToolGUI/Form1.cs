@@ -10,42 +10,35 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 
-namespace SudekiModToolGUI
-{
+namespace SudekiModToolGUI {
     public partial class Form1 : Form
     {
-        enum MergeMode
-        {
+        enum MergeMode {
             AbortOnConflict,
             ModA,
             ModB
         }
 
-        public Form1()
-        {
+        public Form1() {
             InitializeComponent();
             string exeDir = AppDomain.CurrentDomain.BaseDirectory; //Set background img
             string bgPath = Path.Combine(exeDir, "sudekimodmergebg.jpg");
 
-            if (File.Exists(bgPath))
-            {
+            if (File.Exists(bgPath)) {
                 this.BackgroundImage = Image.FromFile(bgPath);
                 this.BackgroundImageLayout = ImageLayout.Stretch;
             }
         }
 
-        private void btnCheckConflicts_Click(object sender, EventArgs e)
-        {
+        private void btnCheckConflicts_Click(object sender, EventArgs e) {
             RunMerger(checkOnly: true);
         }
 
-        private void btnMergeMods_Click(object sender, EventArgs e)
-        {
+        private void btnMergeMods_Click(object sender, EventArgs e) {
             RunMerger(checkOnly: false);
         }
 
-        private void RunMerger(bool checkOnly)
-        {
+        private void RunMerger(bool checkOnly) {
             txtOutput.Clear();
 
             string exeDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -54,20 +47,17 @@ namespace SudekiModToolGUI
             string fileB = Path.Combine(exeDir, "SOLData_B.baf");
             string mergedFile = Path.Combine(exeDir, "SOLDataMerged.baf");
 
-            if (!File.Exists(originalFile) || !File.Exists(fileA) || !File.Exists(fileB)) //Make sure we have files
-            {
+            if (!File.Exists(originalFile) || !File.Exists(fileA) || !File.Exists(fileB)) { //Make sure we have files 
                 txtOutput.Text = "Missing required .baf files (SOLData.baf, SOLData_A.baf & SOLData_B.baf).";
                 return;
             }
 
             MergeMode mode = MergeMode.AbortOnConflict;
 
-            if (checkOnly)
-            {
+            if (checkOnly) {
                 txtOutput.AppendText("Checking for conflicts, please wait...\r\n\r\n");
             }
-            else
-            {
+            else {
                 DialogResult choice = MessageBox.Show(
                     "Choose conflict resolution:\n\nYes = Mod A\nNo = Mod B\nCancel = Abort on conflict",
                     "Conflict Resolution",
@@ -95,13 +85,11 @@ namespace SudekiModToolGUI
             using (var viewO = mmO.CreateViewAccessor())
             using (var viewA = mmA.CreateViewAccessor())
             using (var viewB = mmB.CreateViewAccessor())
-            using (var outStream = checkOnly ? Stream.Null : new FileStream(mergedFile, FileMode.Create, FileAccess.Write))
-            {
+            using (var outStream = checkOnly ? Stream.Null : new FileStream(mergedFile, FileMode.Create, FileAccess.Write)) {
                 bool conflictFound = false;
                 int conflictCount = 0;
 
-                for (long i = 0; i < max; i++)
-                {
+                for (long i = 0; i < max; i++) {
                     byte o = (i < sizeO) ? viewO.ReadByte(i) : (byte)0;
                     byte a = (i < sizeA) ? viewA.ReadByte(i) : (byte)0;
                     byte b = (i < sizeB) ? viewB.ReadByte(i) : (byte)0;
@@ -111,49 +99,39 @@ namespace SudekiModToolGUI
 
                     byte result; //byte data to be merged
 
-                    if (aChanged && bChanged) //Confilct logic
-                    {
-                        if (a == b)
-                        {
+                    if (aChanged && bChanged) { //Confilct logic
+                        if (a == b) {
                             result = a; //same byte = safe
                         }
-                        else
-                        {
+                        else {
                             conflictFound = true;
                             conflictCount++; 
 
-                            if (checkOnly)
-                            {
+                            if (checkOnly) {
                                 txtOutput.AppendText(
                                 $"Conflict at offset 0x{i:X8}  Original:{o:X2}  ModA:{a:X2}  ModB:{b:X2}\r\n");
                                 continue;
                             }
 
-                            if (mode == MergeMode.AbortOnConflict) //Not merge safe
-                            {
+                            if (mode == MergeMode.AbortOnConflict) { //Not merge safe
                                 txtOutput.AppendText("\r\nMerge aborted due to conflict.");
                                 return;
                             }
-                            else if (mode == MergeMode.ModA) //Overwrite conflict
-                            {
+                            else if (mode == MergeMode.ModA) {  //Overwrite conflict 
                                 result = a;
                             }
-                            else
-                            {
+                            else {
                                 result = b;
                             }
                         }
                     }
-                    else if (aChanged)  //Results
-                    {
+                    else if (aChanged) { //Results
                         result = a;
                     }
-                    else if (bChanged)
-                    {
+                    else if (bChanged) {
                         result = b;
                     }
-                    else
-                    {
+                    else {
                         result = o;
                     }
 
@@ -161,14 +139,12 @@ namespace SudekiModToolGUI
                         outStream.WriteByte(result);
                 }
 
-                if (checkOnly)
-                {
+                if (checkOnly) {
                     txtOutput.AppendText(conflictFound
                         ? $"\r\nConflicts were detected. Total data conflicts: {conflictCount}"
                         : "\r\nNo conflicts detected.");
                 }
-                else
-                {
+                else {
                     txtOutput.AppendText(conflictFound && mode != MergeMode.AbortOnConflict
                         ? $"\r\nConflicts resolved using mode: {mode}"
                         : "\r\nMerge completed successfully.");
