@@ -1,22 +1,18 @@
-﻿namespace SudekiModToolGUI
-{
-    partial class Form1
-    {
+﻿namespace SudekiModToolGUI {
+    partial class Form1 {
         private System.ComponentModel.IContainer components = null;
         private System.Windows.Forms.Button btnCheckConflicts;
         private System.Windows.Forms.Button btnMergeMods;
         private System.Windows.Forms.TextBox txtOutput;
         private System.Windows.Forms.TextBox textBox1;
 
-        protected override void Dispose(bool disposing)
-        {
+        protected override void Dispose(bool disposing) {
             if (disposing && (components != null))
                 components.Dispose();
             base.Dispose(disposing);
         }
 
-        private void InitializeComponent()
-        {
+        private void InitializeComponent() {
             this.btnCheckConflicts = new System.Windows.Forms.Button();
             this.btnMergeMods = new System.Windows.Forms.Button();
             this.txtOutput = new System.Windows.Forms.TextBox();
@@ -53,7 +49,6 @@
             this.Text = "Sudeki Mod Merger v1.0";
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
     }
 }
